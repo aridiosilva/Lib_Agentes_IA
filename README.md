@@ -20,10 +20,10 @@ nome-do-agente/
 ├── README.md               # Descrição e modo de uso
 ├── leitor_de_emails/
     ├── agent.json          # Configuração completa do agente (estrutura My Agent Studio)
-└── prompts/
-    ├── chatgpt.md          # Prompt otimizado para ChatGPT
-    ├── gemini.md           # Prompt otimizado para Google Gemini
-    └── claude.md           # Prompt otimizado para Claude (Anthropic)
+    └── prompts/
+        ├── chatgpt.md      # Prompt otimizado para ChatGPT
+        ├── gemini.md       # Prompt otimizado para Google Gemini
+        └── claude.md       # Prompt otimizado para Claude (Anthropic)
 ```
 
 ### Arquivo `agent.json`
