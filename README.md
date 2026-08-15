@@ -1,4 +1,4 @@
-# Lib_Agentes_IA_Elaborados
+# Lib_Agentes_IA
 
 Uma biblioteca de **agentes de IA elaborados** e prontos para usar, cada um especializado em realizar tarefas específicas indicadas em seus nomes.
 
@@ -157,8 +157,8 @@ Os agentes podem ser usados, modificados e distribuídos livremente. Atribua cr�
 ## 🔗 Links úteis
 
 - **My Agent Studio**: https://aridiosilva.github.io/my-agent-studio/
-- **Repositório**: https://github.com/aridiosilva/Lib_Agentes_IA_Elaborados
-- **Issues e Discussões**: https://github.com/aridiosilva/Lib_Agentes_IA_Elaborados/issues
+- **Repositório**: https://github.com/aridiosilva/Lib_Agentes_IA
+- **Issues e Discussões**: https://github.com/aridiosilva/Lib_Agentes_IA/issues
 
 ## 🎯 Roadmap
 
