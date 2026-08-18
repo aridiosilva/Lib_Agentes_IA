@@ -75,11 +75,7 @@ Agente: Analisa e apresenta demonstrativo
 
 ## 2. ESTRUTURA DO PROJETO
 
-<<<<<<< HEAD
-```
-=======
 ```txt
->>>>>>> origin/main
 leitor-contas-pagar/
 │
 ├── README.md
@@ -100,11 +96,7 @@ leitor-contas-pagar/
 ├── temp/
 │
 └── output/
-<<<<<<< HEAD
     └── contas_a_pagar.json
-=======
-    └── contas_a_pagar.json'''
->>>>>>> origin/main
 ```
 
 ---
@@ -955,11 +947,11 @@ class EmailProcessor:
 ```
 ---
 
-## 7. src/_main_.py
+## 7. src/main.py
 
 ```python
 """
-   src/_main_.py
+   src/main.py
    Ponto de entrada principal do sistema
 """
 
@@ -1088,7 +1080,7 @@ if __name__ == '__main__':
 
 ---
 
-## 8. src/_init_.py
+## 8. src/__init__.py
 
 ```python
 """
@@ -1106,7 +1098,7 @@ __all__ = ['GmailClient', 'PDFExtractor', 'EmailProcessor']
 
 ---
 
-## 9. src/main.py (Opcional - permite executar como módulo)
+## 9. src/__main__.py (Permite executar o pacote com: python -m src)
 
 ```python
 """

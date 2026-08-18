@@ -1,9 +1,3 @@
-
----
-
-## 12. Script de Setup Automático (setup.py)
-
-```python
 """
 setup.py - Script para configurar o ambiente automaticamente
 """
