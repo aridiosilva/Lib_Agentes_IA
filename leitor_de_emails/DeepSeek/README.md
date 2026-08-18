@@ -55,7 +55,7 @@ venv\Scripts\activate
 
 ### Fluxo de Trabalho
 
-```
+```txt
 Usuário: "Processa meus e-mails"
 ↓
 Agente: Gera código Python completo
@@ -71,7 +71,7 @@ Agente: Analisa e apresenta demonstrativo
 
 ## 2. ESTRUTURA DO PROJETO
 
-```
+```txt
 leitor-contas-pagar/
 │
 ├── README.md
@@ -112,8 +112,7 @@ requests>=2.31.0
 
 ## 4. src/gmail_client.py
 
-```
-python
+```python
 """
   src/gmail_client.py
   Gmail Client - Conexão e busca de e-mails via API Gmail
@@ -347,7 +346,7 @@ class GmailClient:
 
 ## 5. src/pdf_extractor.py
 
-```
+```python
 """
    src/pdf_extractor.py
    PDF Extractor - Extração de dados de boletos e faturas
@@ -682,7 +681,7 @@ class PDFExtractor:
 
 ## 6. src/email_processor.py
 
-```
+```python
 """
    src/email_processor.py
    Email Processor - Orquestra o processamento completo
@@ -946,7 +945,7 @@ class EmailProcessor:
 
 ## 7. src/_main_.py
 
-```
+```python
 """
    src/_main_.py
    Ponto de entrada principal do sistema
@@ -1079,7 +1078,7 @@ if __name__ == '__main__':
 
 ## 8. src/_init_.py
 
-```
+```python
 """
 src/__init__.py
 Pacote src - Módulos para leitura de e-mails e extração de dados de contas a pagar
@@ -1097,7 +1096,7 @@ __all__ = ['GmailClient', 'PDFExtractor', 'EmailProcessor']
 
 ## 9. src/main.py (Opcional - permite executar como módulo)
 
-```
+```python
 """
    src/__main__.py
    Permite executar o pacote com: python -m src
@@ -1113,7 +1112,7 @@ if __name__ == '__main__':
 
 ## 10. credentials/credentials.json - INSTRUÇÕES
 
-```
+```txt
 /*
 INSTRUÇÕES PARA OBTER O ARQUIVO credentials.json:
 
@@ -1181,13 +1180,13 @@ venv\Scripts\activate
 
 ###Linux/Mac:
 
-```
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 3. Instale as dependências:
 
-```
+```bash
 pip install -r requirements.txt
 ```
 ---
@@ -1201,7 +1200,7 @@ pip install -r requirements.txt
 
 Execute o script principal:
 
-```
+```bash
 python src/main.py
 ```
 
@@ -1223,7 +1222,7 @@ O sistema gera um arquivo output/contas_a_pagar.json com:
 
 ## 🗂️ Estrutura do Projeto
 
-```
+```txt
 leitor-contas-pagar/
 ├── README.md
 ├── requirements.txt
@@ -1272,14 +1271,14 @@ pip install -r requirements.txt
 
 ### O navegador não abre### 
 
-```
+```txt
 - Verifique se o navegador padrão está configurado
 - Ou execute com --no-browser e cole a URL manualmente
 ```
 
 ## 🔐 Segurança
 
-```
+```txt
 - NUNCA commite token.pickle ou credentials.json
 - NUNCA compartilhe o JSON de saída com dados sensíveis
 - Os PDFs são deletados após o processamento
@@ -1416,7 +1415,7 @@ if __name__ == '__main__':
 
 Agora o arquivo completo deve incluir:
 
-```
+```json
 {
   "data_execucao": "2026-08-17T10:30:00.000Z",
   "periodo_busca": {
@@ -1541,7 +1540,7 @@ Quando o usuário enviar o JSON, o agente deve:
 
 ## RESUMO DA ESTRUTURA COMPLETA DE ARQUIVOS
 
-```
+```txt
 leitor-contas-pagar/
 │
 ├── README.md                          # Instruções de uso
