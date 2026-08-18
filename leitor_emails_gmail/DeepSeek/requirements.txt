@@ -1,0 +1,8 @@
+# requirements.txt
+google-auth>=2.23.0
+google-auth-oauthlib>=1.0.0
+google-api-python-client>=2.108.0
+pypdf>=3.17.0
+pdfplumber>=0.10.0
+python-dateutil>=2.8.2
+requests>=2.31.0

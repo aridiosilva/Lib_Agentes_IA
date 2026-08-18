@@ -1,0 +1,53 @@
+{
+  "data_execucao": "2026-08-17T10:30:00.000Z",
+  "periodo_busca": {
+    "inicio": "2026-05-19",
+    "fim": "2026-08-17",
+    "dias": 90
+  },
+  "total_contas": 0,
+  "total_geral": 0.00,
+  "resumo_por_categoria": {
+    "cartao": { "quantidade": 0, "total": 0.00 },
+    "boleto": { "quantidade": 0, "total": 0.00 },
+    "condominio": { "quantidade": 0, "total": 0.00 },
+    "utilidade": { "quantidade": 0, "total": 0.00 },
+    "telecom": { "quantidade": 0, "total": 0.00 }
+  },
+  "contas": [
+    {
+      "email_id": "string",
+      "data_email": "2026-08-13T10:30:00Z",
+      "remetente": "string",
+      "assunto": "string",
+      "emissor": "string",
+      "banco_pagamento": "string | null",
+      "tipo": "boleto | fatura | carnê",
+      "categoria": "cartao | boleto | condominio | utilidade | telecom",
+      "vencimento": "2026-08-13",
+      "valor": 0.00,
+      "codigo_barras": "string | null",
+      "linha_digitavel": "string | null",
+      "matricula": "string | null",
+      "apartamento": "string | null",
+      "bloco": "string | null",
+      "desconto": 0.00 | null,
+      "multa": 0.00 | null,
+      "status": "vencido | hoje | 3_dias | ate_7_dias | mais_de_7_dias",
+      "anexo_pdf": "nome_arquivo.pdf",
+      "erro": "string | null"
+    }
+  ],
+  "alertas": {
+    "vencidos": [],
+    "hoje": [],
+    "proximos_3_dias": []
+  },
+  "estatisticas": {
+    "total_emails_processados": 0,
+    "total_pdfs_lidos": 0,
+    "total_pdfs_com_erro": 0,
+    "media_valor": 0.00,
+    "vencimento_mais_proximo": "2026-08-13 | null"
+  }
+}

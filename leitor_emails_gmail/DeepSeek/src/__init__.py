@@ -8,9 +8,9 @@ import sys
 # Adiciona src ao path para importação
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from workmail_client import WorkmailClient
+from gmail_client import GmailClient
 from pdf_extractor import PDFExtractor
 from email_processor import EmailProcessor
 
 __version__ = '1.0.0'
-__all__ = ['WorkmailClient', 'PDFExtractor', 'EmailProcessor']
+__all__ = ['GmailClient', 'PDFExtractor', 'EmailProcessor']

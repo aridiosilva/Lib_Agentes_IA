@@ -12,34 +12,36 @@ from pathlib import Path
 # Adiciona src ao path para importação
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from workmail_client import WorkmailClient
+from gmail_client import GmailClient
 from pdf_extractor import PDFExtractor
 from email_processor import EmailProcessor
 
 
 def verificar_credentials():
-    """Verifica se o arquivo workmail_credentials.json existe"""
-    cred_path = 'credentials/workmail_credentials.json'
+    """Verifica se o arquivo credentials.json existe"""
+    cred_path = 'credentials/credentials.json'
     
     if not os.path.exists(cred_path):
-        print('\n❌ Arquivo workmail_credentials.json não encontrado!')
-        print('\n📋 Instruções para obter/criar workmail_credentials.json:')
-        print('  1. Crie um arquivo com o nome workmail_credentials.json na pasta credentials/')
-        print('  2. Insira a seguinte estrutura preenchida com seus dados:')
-        print('     {')
-        print('       "imap_server": "imap.mail.us-east-1.awsapps.com",')
-        print('       "username": "seu-usuario@seu-dominio.awsapps.com",')
-        print('       "password": "sua-senha-aqui"')
-        print('     }')
-        print('\n   Pasta esperada: credentials/workmail_credentials.json')
+        print('\n❌ Arquivo credentials.json não encontrado!')
+        print('\n📋 Instruções para obter credentials.json:')
+        print('  1. Acesse https://console.cloud.google.com/')
+        print('  2. Crie um novo projeto ou selecione um existente')
+        print('  3. Ative a Gmail API: APIs & Services > Library > Gmail API > Enable')
+        print('  4. Configure OAuth: APIs & Services > Credentials > Create Credentials > OAuth Client ID')
+        print('  5. Tipo de aplicação: Desktop app')
+        print('  6. Baixe o arquivo JSON e renomeie para credentials.json')
+        print('  7. Coloque o arquivo na pasta credentials/')
+        print('\n   Pasta esperada: credentials/credentials.json')
         return False
     
     return True
 
 
 def verificar_dependencias():
-    """Verifica se as dependências do leitor estão instaladas"""
+    """Verifica se as dependências estão instaladas"""
     try:
+        import google.auth
+        import googleapiclient
         import pdfplumber
         import pypdf
         return True
@@ -53,7 +55,7 @@ def verificar_dependencias():
 def main():
     """Função principal"""
     print('\n' + '='*60)
-    print('📧 LEITOR DE EMAILS - CONTAS A PAGAR (AMAZON WORKMAIL)')
+    print('📧 LEITOR DE EMAILS - CONTAS A PAGAR')
     print('='*60 + '\n')
     
     # Verifica pré-requisitos
@@ -63,16 +65,15 @@ def main():
     if not verificar_dependencias():
         sys.exit(1)
     
-    workmail_client = None
     try:
         # Inicializa componentes
-        print('🔐 Autenticando no Amazon WorkMail...')
-        workmail_client = WorkmailClient()
-        workmail_client.authenticate()
+        print('🔐 Autenticando no Gmail...')
+        gmail_client = GmailClient()
+        gmail_client.authenticate()
         print('✅ Autenticação realizada com sucesso!\n')
         
         pdf_extractor = PDFExtractor()
-        processor = EmailProcessor(workmail_client, pdf_extractor)
+        processor = EmailProcessor(gmail_client, pdf_extractor)
         
         # Processa e-mails
         print('📥 Iniciando processamento...\n')
@@ -119,9 +120,6 @@ def main():
         import traceback
         traceback.print_exc()
         sys.exit(1)
-    finally:
-        if workmail_client:
-            workmail_client.logout()
 
 
 if __name__ == '__main__':

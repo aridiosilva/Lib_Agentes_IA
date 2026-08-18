@@ -7,15 +7,15 @@ import os
 import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from workmail_client import WorkmailClient
+from gmail_client import GmailClient
 from pdf_extractor import PDFExtractor
 
 
 class EmailProcessor:
     """Processador principal de e-mails"""
     
-    def __init__(self, workmail_client: WorkmailClient, pdf_extractor: PDFExtractor):
-        self.gmail = workmail_client
+    def __init__(self, gmail_client: GmailClient, pdf_extractor: PDFExtractor):
+        self.gmail = gmail_client
         self.pdf_extractor = pdf_extractor
         self.temp_dir = 'temp'
         os.makedirs(self.temp_dir, exist_ok=True)
