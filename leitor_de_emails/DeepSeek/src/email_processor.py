@@ -1,335 +1,234 @@
 """
-src/pdf_extractor.py
-PDF Extractor - Extração de dados de boletos e faturas
+src/email_processor.py
+Email Processor - Orquestração do processamento de e-mails e PDFs
 """
 
-import re
-import io
-from typing import Dict, Optional, List
-from datetime import datetime
-import pdfplumber
-from pypdf import PdfReader
+import os
+import json
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+from gmail_client import GmailClient
+from pdf_extractor import PDFExtractor
 
 
-class PDFExtractor:
-    """Extrator de dados de PDFs de contas a pagar"""
+class EmailProcessor:
+    """Processador principal de e-mails"""
     
-    # Mapeamento de bancos por código de barras
-    BANCO_CODIGOS = {
-        '001': 'Banco do Brasil',
-        '237': 'Bradesco',
-        '341': 'Itaú',
-        '104': 'Caixa Econômica',
-        '033': 'Santander',
-        '260': 'Nubank',
-        '745': 'Citibank',
-        '399': 'HSBC',
-        '422': 'Safra',
-        '756': 'Sicoob',
-        '077': 'Inter',
-    }
+    def __init__(self, gmail_client: GmailClient, pdf_extractor: PDFExtractor):
+        self.gmail = gmail_client
+        self.pdf_extractor = pdf_extractor
+        self.temp_dir = 'temp'
+        os.makedirs(self.temp_dir, exist_ok=True)
     
-    def extrair_texto(self, pdf_bytes: bytes) -> str:
-        """Extrai texto do PDF"""
-        try:
-            # Tenta com pdfplumber primeiro (melhor para tabelas)
-            with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-                texto = ''
-                for page in pdf.pages:
-                    texto += page.extract_text() or ''
-                if texto.strip():
-                    return texto
-            
-            # Fallback para pypdf
-            reader = PdfReader(io.BytesIO(pdf_bytes))
-            texto = ''
-            for page in reader.pages:
-                texto += page.extract_text() or ''
-            return texto
-            
-        except Exception as e:
-            raise ValueError(f'Erro ao extrair texto do PDF: {e}')
-    
-    def extrair_dados_boleto(self, texto: str) -> Dict:
+    def processar(self, dias: int = 90, max_emails: int = 200) -> Dict:
         """
-        Extrai dados estruturados do texto do PDF
+        Processa e-mails e gera JSON estruturado
         
         Args:
-            texto: Texto extraído do PDF
+            dias: Número de dias para buscar
+            max_emails: Máximo de e-mails a processar
             
         Returns:
-            Dicionário com dados extraídos
+            Dicionário com dados estruturados
         """
-        dados = {
-            'emissor': None,
-            'banco_pagamento': None,
-            'tipo': None,
-            'vencimento': None,
-            'valor': None,
-            'codigo_barras': None,
-            'linha_digitavel': None,
-            'matricula': None,
-            'apartamento': None,
-            'bloco': None,
-            'desconto': None,
-            'multa': None,
-        }
+        print(f'🔍 Buscando e-mails dos últimos {dias} dias...')
         
-        # Limpa e normaliza texto
-        texto = texto.replace('\n', ' ').replace('\r', ' ')
-        texto = ' '.join(texto.split())
+        emails = self.gmail.buscar_emails(dias=dias, max_results=max_emails)
+        print(f'📧 Encontrados {len(emails)} e-mails com PDFs')
         
-        # 1. Extrai código de barras (padrões comuns)
-        dados['codigo_barras'] = self._extrair_codigo_barras(texto)
+        contas = []
+        total_pdfs_lidos = 0
+        total_pdfs_com_erro = 0
+        total_emails_processados = 0
         
-        # 2. Identifica banco de pagamento
-        if dados['codigo_barras']:
-            codigo_banco = dados['codigo_barras'][:3]
-            dados['banco_pagamento'] = self.BANCO_CODIGOS.get(codigo_banco)
-        
-        # Se não identificou pelo código, tenta por texto
-        if not dados['banco_pagamento']:
-            dados['banco_pagamento'] = self._identificar_banco_texto(texto)
-        
-        # 3. Extrai linha digitável
-        dados['linha_digitavel'] = self._extrair_linha_digitavel(texto)
-        
-        # 4. Extrai emissor
-        dados['emissor'] = self._extrair_emissor(texto)
-        
-        # 5. Extrai tipo
-        dados['tipo'] = self._extrair_tipo(texto)
-        
-        # 6. Extrai vencimento
-        dados['vencimento'] = self._extrair_vencimento(texto)
-        
-        # 7. Extrai valor
-        dados['valor'] = self._extrair_valor(texto)
-        
-        # 8. Extrai matrícula
-        dados['matricula'] = self._extrair_matricula(texto)
-        
-        # 9. Extrai dados de condomínio
-        dados['apartamento'] = self._extrair_apartamento(texto)
-        dados['bloco'] = self._extrair_bloco(texto)
-        
-        return dados
-    
-    def _extrair_codigo_barras(self, texto: str) -> Optional[str]:
-        """Extrai código de barras (44 dígitos)"""
-        padroes = [
-            r'\b(\d{44})\b',
-            r'código de barras[:\s]*(\d{44})',
-            r'codigo de barras[:\s]*(\d{44})',
-            r'linha digitável[:\s]*(\d{44})',
-        ]
-        
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                return match.group(1)
-        
-        return None
-    
-    def _identificar_banco_texto(self, texto: str) -> Optional[str]:
-        """Identifica banco pelo texto"""
-        bancos = {
-            'bradesco': 'Bradesco',
-            'itaú': 'Itaú',
-            'itau': 'Itaú',
-            'banco do brasil': 'Banco do Brasil',
-            'caixa econômica': 'Caixa Econômica',
-            'caixa economica': 'Caixa Econômica',
-            'santander': 'Santander',
-            'nubank': 'Nubank',
-            'sicredi': 'Sicredi',
-            'sicoob': 'Sicoob',
-            'banco inter': 'Inter',
-            'inter': 'Inter',
-        }
-        
-        texto_lower = texto.lower()
-        for key, value in bancos.items():
-            if key in texto_lower:
-                return value
-        
-        return None
-    
-    def _extrair_linha_digitavel(self, texto: str) -> Optional[str]:
-        """Extrai linha digitável"""
-        padroes = [
-            r'\b(\d{5}\.\d{5}\s*\d{5}\.\d{6}\s*\d{5}\.\d{6}\s*\d{1}\s*\d{14})\b',
-            r'linha digitável[:\s]*([\d\.\s]{47,48})',
-        ]
-        
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                return match.group(1).replace(' ', '')
-        
-        return None
-    
-    def _extrair_emissor(self, texto: str) -> Optional[str]:
-        """Extrai emissor da cobrança"""
-        emissores = {
-            'nubank': 'Nubank',
-            'banco do brasil': 'Banco do Brasil',
-            'bradesco': 'Bradesco',
-            'itau': 'Itaú',
-            'itaú': 'Itaú',
-            'caixa': 'Caixa Econômica',
-            'santander': 'Santander',
-            'vivo': 'Vivo',
-            'cpfl': 'CPFL',
-            'enel': 'Enel',
-            'cis': 'CIS',
-            'administradora': 'Administradora de Condomínio',
-            'condominio': 'Administradora de Condomínio',
-            'condomínio': 'Administradora de Condomínio',
-            'sicoob': 'Sicoob',
-            'sicredi': 'Sicredi',
-        }
-        
-        texto_lower = texto.lower()
-        
-        for key, value in emissores.items():
-            if key in texto_lower:
-                return value
-        
-        padrao_empresa = r'(?:empresa|prestador|favorecido)[:\s]+([A-ZÀ-Ú][A-ZÀ-Ú\s]{2,})'
-        match = re.search(padrao_empresa, texto, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-        
-        return None
-    
-    def _extrair_tipo(self, texto: str) -> Optional[str]:
-        """Extrai tipo de documento"""
-        texto_lower = texto.lower()
-        
-        if 'boleto' in texto_lower:
-            return 'boleto'
-        elif 'fatura' in texto_lower or 'cartão' in texto_lower or 'cartao' in texto_lower:
-            return 'fatura'
-        elif 'carne' in texto_lower or 'carnê' in texto_lower:
-            return 'carnê'
-        
-        return None
-    
-    def _extrair_vencimento(self, texto: str) -> Optional[str]:
-        """Extrai data de vencimento no formato YYYY-MM-DD"""
-        padroes = [
-            (r'vencimento[:\s]*(\d{2})[/-](\d{2})[/-](\d{4})', '%d/%m/%Y'),
-            (r'vencimento[:\s]*(\d{2})[/-](\d{2})[/-](\d{2})', '%d/%m/%y'),
-            (r'vencimento[:\s]*(\d{4})[/-](\d{2})[/-](\d{2})', '%Y-%m-%d'),
-            (r'vencimento[:\s]*(\d{2})\.(\d{2})\.(\d{4})', '%d.%m.%Y'),
-        ]
-        
-        for padrao, formato in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
+        for email in emails:
+            total_emails_processados += 1
+            print(f'  📩 Processando: {email["assunto"][:50]}...')
+            
+            for anexo in email['anexos']:
                 try:
-                    if formato == '%d/%m/%y':
-                        dia, mes, ano = match.groups()
-                        ano = f'20{ano}' if int(ano) < 70 else f'19{ano}'
-                        data_str = f'{dia}/{mes}/{ano}'
-                        formato = '%d/%m/%Y'
-                    else:
-                        data_str = '-'.join(match.groups())
+                    pdf_bytes = self.gmail.baixar_anexo(
+                        email['id'], 
+                        anexo['attachmentId']
+                    )
                     
-                    data = datetime.strptime(data_str, formato)
-                    return data.strftime('%Y-%m-%d')
-                except:
-                    continue
+                    if not pdf_bytes:
+                        continue
+                    
+                    temp_path = os.path.join(self.temp_dir, anexo['filename'])
+                    with open(temp_path, 'wb') as f:
+                        f.write(pdf_bytes)
+                    
+                    texto = self.pdf_extractor.extrair_texto(pdf_bytes)
+                    dados_pdf = self.pdf_extractor.extrair_dados_boleto(texto)
+                    
+                    conta = {
+                        'email_id': email['id'],
+                        'data_email': email['data'],
+                        'remetente': email['remetente'],
+                        'assunto': email['assunto'],
+                        'emissor': dados_pdf.get('emissor'),
+                        'banco_pagamento': dados_pdf.get('banco_pagamento'),
+                        'tipo': dados_pdf.get('tipo'),
+                        'categoria': self._determinar_categoria(email, dados_pdf),
+                        'vencimento': dados_pdf.get('vencimento'),
+                        'valor': dados_pdf.get('valor'),
+                        'codigo_barras': dados_pdf.get('codigo_barras'),
+                        'linha_digitavel': dados_pdf.get('linha_digitavel'),
+                        'matricula': dados_pdf.get('matricula'),
+                        'apartamento': dados_pdf.get('apartamento'),
+                        'bloco': dados_pdf.get('bloco'),
+                        'desconto': dados_pdf.get('desconto'),
+                        'multa': dados_pdf.get('multa'),
+                        'status': self._calcular_status(dados_pdf.get('vencimento')),
+                        'anexo_pdf': anexo['filename'],
+                        'erro': None
+                    }
+                    
+                    contas.append(conta)
+                    total_pdfs_lidos += 1
+                    
+                    os.remove(temp_path)
+                    
+                except Exception as e:
+                    total_pdfs_com_erro += 1
+                    print(f'    ❌ Erro no PDF {anexo["filename"]}: {e}')
+                    
+                    conta = {
+                        'email_id': email['id'],
+                        'data_email': email['data'],
+                        'remetente': email['remetente'],
+                        'assunto': email['assunto'],
+                        'emissor': None,
+                        'banco_pagamento': None,
+                        'tipo': None,
+                        'categoria': self._determinar_categoria(email, {}),
+                        'vencimento': None,
+                        'valor': None,
+                        'codigo_barras': None,
+                        'linha_digitavel': None,
+                        'matricula': None,
+                        'apartamento': None,
+                        'bloco': None,
+                        'desconto': None,
+                        'multa': None,
+                        'status': None,
+                        'anexo_pdf': anexo['filename'],
+                        'erro': str(e)
+                    }
+                    contas.append(conta)
         
-        return None
+        json_output = self._gerar_json(contas, total_emails_processados, 
+                                      total_pdfs_lidos, total_pdfs_com_erro)
+        
+        output_dir = 'output'
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, 'contas_a_pagar.json')
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(json_output, f, ensure_ascii=False, indent=2)
+        
+        print(f'\n✅ Processamento concluído!')
+        print(f'📄 JSON salvo em: {output_path}')
+        print(f'📊 Total de contas encontradas: {len(contas)}')
+        print(f'💰 Total geral: R$ {json_output["total_geral"]:.2f}')
+        
+        return json_output
     
-    def _extrair_valor(self, texto: str) -> Optional[float]:
-        """Extrai valor decimal"""
-        padroes = [
-            r'valor[:\s]*R?\$?\s*([\d,]+\.\d{2})',
-            r'valor[:\s]*R?\$?\s*([\d.]+\,\d{2})',
-            r'R?\$?\s*([\d,]+\.\d{2})',
-            r'R?\$?\s*([\d.]+\,\d{2})',
-        ]
+    def _determinar_categoria(self, email: Dict, dados_pdf: Dict) -> str:
+        """Determina a categoria da conta"""
+        assunto = email['assunto'].lower()
+        remetente = email['remetente'].lower()
+        emissor = dados_pdf.get('emissor', '').lower()
         
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                valor_str = match.group(1)
-                if ',' in valor_str and '.' in valor_str:
-                    valor_str = valor_str.replace('.', '').replace(',', '.')
-                elif ',' in valor_str:
-                    valor_str = valor_str.replace(',', '.')
-                try:
-                    return round(float(valor_str), 2)
-                except:
-                    continue
+        if 'condominio' in assunto or 'condomínio' in assunto:
+            return 'condominio'
         
-        return None
+        if 'cartão' in assunto or 'cartao' in assunto or 'visa' in assunto or 'mastercard' in assunto:
+            return 'cartao'
+        
+        if any(palavra in assunto for palavra in ['água', 'agua', 'esgoto', 'luz', 'energia', 'elétrica', 'eletrica']):
+            return 'utilidade'
+        
+        if any(palavra in assunto for palavra in ['internet', 'celular', 'telefone', 'vivo']):
+            return 'telecom'
+        
+        if 'boleto' in assunto or dados_pdf.get('tipo') == 'boleto':
+            return 'boleto'
+        
+        if any(em in emissor for em in ['nubank', 'banco do brasil', 'bradesco', 'itau', 'caixa', 'santander']):
+            return 'boleto'
+        
+        return 'outros'
     
-    def _extrair_matricula(self, texto: str) -> Optional[str]:
-        """Extrai número de matrícula/contrato"""
-        padroes = [
-            r'matrícula[:\s]*([A-Z0-9\-]{6,})',
-            r'matricula[:\s]*([A-Z0-9\-]{6,})',
-            r'contrato[:\s]*([A-Z0-9\-]{6,})',
-            r'n[°º]?\s*[:\s]*([A-Z0-9\-]{6,})',
-        ]
+    def _calcular_status(self, vencimento: Optional[str]) -> Optional[str]:
+        """Calcula status do vencimento"""
+        if not vencimento:
+            return None
         
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                return match.group(1)
-        
-        return None
+        try:
+            data_venc = datetime.strptime(vencimento, '%Y-%m-%d')
+            hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            
+            dias_ate = (data_venc - hoje).days
+            
+            if dias_ate < 0:
+                return 'vencido'
+            elif dias_ate == 0:
+                return 'hoje'
+            elif dias_ate <= 3:
+                return '3_dias'
+            elif dias_ate <= 7:
+                return 'ate_7_dias'
+            else:
+                return 'mais_de_7_dias'
+        except:
+            return None
     
-    def _extrair_apartamento(self, texto: str) -> Optional[str]:
-        """Extrai número do apartamento (condomínio)"""
-        padroes = [
-            r'apartamento[:\s]*([A-Z0-9\-]{1,10})',
-            r'apto[:\s]*([A-Z0-9\-]{1,10})',
-            r'ap[.:\s]*([A-Z0-9\-]{1,10})',
-        ]
+    def _gerar_json(self, contas: List[Dict], total_emails: int, 
+                    total_pdfs_lidos: int, total_pdfs_com_erro: int) -> Dict:
+        """Gera JSON estruturado de saída"""
+        resumo_categorias = {
+            'cartao': {'quantidade': 0, 'total': 0.0},
+            'boleto': {'quantidade': 0, 'total': 0.0},
+            'condominio': {'quantidade': 0, 'total': 0.0},
+            'utilidade': {'quantidade': 0, 'total': 0.0},
+            'telecom': {'quantidade': 0, 'total': 0.0},
+            'outros': {'quantidade': 0, 'total': 0.0}
+        }
         
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                return match.group(1)
+        alertas = {
+            'vencidos': [],
+            'hoje': [],
+            'proximos_3_dias': []
+        }
         
-        return None
-    
-    def _extrair_bloco(self, texto: str) -> Optional[str]:
-        """Extrai bloco (condomínio)"""
-        padroes = [
-            r'bloco[:\s]*([A-Z0-9\-]{1,10})',
-            r'bl[.:\s]*([A-Z0-9\-]{1,10})',
-        ]
+        total_geral = 0.0
+        valores = []
+        vencimento_mais_proximo = None
         
-        for padrao in padroes:
-            match = re.search(padrao, texto, re.IGNORECASE)
-            if match:
-                return match.group(1)
-        
-        return None
-    
-    def extrair_dados_condominio(self, texto: str) -> Dict:
-        """Extrai dados específicos de condomínio"""
-        dados = {}
-        
-        apto = self._extrair_apartamento(texto)
-        if apto:
-            dados['apartamento'] = apto
-        
-        bloco = self._extrair_bloco(texto)
-        if bloco:
-            dados['bloco'] = bloco
-        
-        return dados
+        for conta in contas:
+            categoria = conta.get('categoria', 'outros')
+            if categoria in resumo_categorias:
+                resumo_categorias[categoria]['quantidade'] += 1
+                if conta.get('valor'):
+                    resumo_categorias[categoria]['total'] += conta['valor']
+            
+            if conta.get('valor'):
+                total_geral += conta['valor']
+                valores.append(conta['valor'])
+            
+            if conta.get('status') == 'vencido':
+                alertas['vencidos'].append(conta['email_id'])
+            elif conta.get('status') == 'hoje':
+                alertas['hoje'].append(conta['email_id'])
+            elif conta.get('status') == '3_dias':
+                alertas['proximos_3_dias'].append(conta['email_id'])
+            
+            if conta.get('vencimento'):
                 if not vencimento_mais_proximo or conta['vencimento'] < vencimento_mais_proximo:
                     vencimento_mais_proximo = conta['vencimento']
         
-        # Remove categoria 'outros' do resumo final
         del resumo_categorias['outros']
         
         media_valor = sum(valores) / len(valores) if valores else 0.0
