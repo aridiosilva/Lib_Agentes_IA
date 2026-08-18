@@ -18,6 +18,7 @@ Sistema para ler e-mails do Gmail, extrair dados de faturas e boletos em PDF, e 
 ```bash
 python -m venv venv
 venv\Scripts\activate
+```
 
 # DEEPSEEK.md - Agente Leitor de Emails de Contas a Pagar
 
@@ -54,7 +55,11 @@ venv\Scripts\activate
 
 ### Fluxo de Trabalho
 
+<<<<<<< HEAD
 ```
+=======
+```txt
+>>>>>>> origin/main
 Usuário: "Processa meus e-mails"
 ↓
 Agente: Gera código Python completo
@@ -70,7 +75,11 @@ Agente: Analisa e apresenta demonstrativo
 
 ## 2. ESTRUTURA DO PROJETO
 
+<<<<<<< HEAD
 ```
+=======
+```txt
+>>>>>>> origin/main
 leitor-contas-pagar/
 │
 ├── README.md
@@ -91,7 +100,11 @@ leitor-contas-pagar/
 ├── temp/
 │
 └── output/
+<<<<<<< HEAD
     └── contas_a_pagar.json
+=======
+    └── contas_a_pagar.json'''
+>>>>>>> origin/main
 ```
 
 ---
@@ -107,11 +120,11 @@ pypdf>=3.17.0
 pdfplumber>=0.10.0
 python-dateutil>=2.8.2
 requests>=2.31.0
-'''
+```
 
-##4. src/gmail_client.py
+## 4. src/gmail_client.py
 
-'''
+```python
 """
   src/gmail_client.py
   Gmail Client - Conexão e busca de e-mails via API Gmail
@@ -340,12 +353,12 @@ class GmailClient:
         except HttpError as error:
             print(f'Erro ao baixar anexo: {error}')
             return None
-'''
+```
 
 
-##5. src/pdf_extractor.py
+## 5. src/pdf_extractor.py
 
-'''
+```python
 """
    src/pdf_extractor.py
    PDF Extractor - Extração de dados de boletos e faturas
@@ -675,11 +688,12 @@ class PDFExtractor:
             dados['bloco'] = bloco
         
         return dados
-'''
+```
+---
 
-##6. src/email_processor.py
+## 6. src/email_processor.py
 
-'''
+```python
 """
    src/email_processor.py
    Email Processor - Orquestra o processamento completo
@@ -938,12 +952,12 @@ class EmailProcessor:
                 'vencimento_mais_proximo': vencimento_mais_proximo
             }
         }
-'''
+```
+---
 
+## 7. src/_main_.py
 
-##7. src/_main_.py
-
-'''
+```python
 """
    src/_main_.py
    Ponto de entrada principal do sistema
@@ -1070,11 +1084,13 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
+```
 
-##8. src/_init_.py
+---
 
-'''
+## 8. src/_init_.py
+
+```python
 """
 src/__init__.py
 Pacote src - Módulos para leitura de e-mails e extração de dados de contas a pagar
@@ -1086,11 +1102,13 @@ from .email_processor import EmailProcessor
 
 __version__ = '1.0.0'
 __all__ = ['GmailClient', 'PDFExtractor', 'EmailProcessor']
-'''
+```
 
-##9. src/main.py (Opcional - permite executar como módulo)
+---
 
-'''
+## 9. src/main.py (Opcional - permite executar como módulo)
+
+```python
 """
    src/__main__.py
    Permite executar o pacote com: python -m src
@@ -1100,11 +1118,13 @@ from .main import main
 
 if __name__ == '__main__':
     main()
-'''
+```
 
-##10. credentials/credentials.json - INSTRUÇÕES
+---
 
-'''
+## 10. credentials/credentials.json - INSTRUÇÕES
+
+```txt
 /*
 INSTRUÇÕES PARA OBTER O ARQUIVO credentials.json:
 
@@ -1144,8 +1164,8 @@ CONTEÚDO DO credentials.json (exemplo):
   }
 }
 */
-'''
-
+```
+---
 
 ## 11. README.md - Instruções para o Usuário
 
@@ -1168,21 +1188,20 @@ Sistema para ler e-mails do Gmail, extrair dados de faturas e boletos em PDF, e 
 ```bash
 python -m venv venv
 venv\Scripts\activate
-'''
+```
 
 ###Linux/Mac:
 
-'''
+```bash
 python3 -m venv venv
 source venv/bin/activate
-'''
-
+```
 3. Instale as dependências:
 
-'''
+```bash
 pip install -r requirements.txt
-'''
-
+```
+---
 
 4. Configure as credenciais do Gmail:
 
@@ -1193,9 +1212,9 @@ pip install -r requirements.txt
 
 Execute o script principal:
 
-'''
+```bash
 python src/main.py
-'''
+```
 
 
 O navegador abrirá para autenticação:
@@ -1213,9 +1232,9 @@ O sistema gera um arquivo output/contas_a_pagar.json com:
 - Alertas (vencidos, vencem hoje, vencem em 3 dias)
 - Estatísticas gerais
 
-##🗂️ Estrutura do Projeto
+## 🗂️ Estrutura do Projeto
 
-'''
+```txt
 leitor-contas-pagar/
 ├── README.md
 ├── requirements.txt
@@ -1231,9 +1250,10 @@ leitor-contas-pagar/
 ├── temp/                      # Arquivos temporários (não commitar)
 └── output/
     └── contas_a_pagar.json    # JSON de saída (não commitar)
-'''
+```
+---
 
-##⚙️ Configurações
+## ⚙️ Configurações
 
 As principais configurações estão em src/email_processor.py:
 
@@ -1249,28 +1269,33 @@ Verifique se o arquivo está em credentials/credentials.json
 
 Baixe novamente do Google Cloud Console
 
-###Erro: "Dependência faltando"
+### Erro: "Dependência faltando"
 
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
-###Erro de autenticação
+### Erro de autenticação
 
+```
 - Delete credentials/token.pickle e execute novamente
+```
 
 ### O navegador não abre### 
 
+```txt
 - Verifique se o navegador padrão está configurado
 - Ou execute com --no-browser e cole a URL manualmente
+```
 
 ## 🔐 Segurança
 
+```txt
 - NUNCA commite token.pickle ou credentials.json
 - NUNCA compartilhe o JSON de saída com dados sensíveis
 - Os PDFs são deletados após o processamento
 
-'''
+```
 
 ---
 
@@ -1332,7 +1357,8 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
+```
+
 ---
 
 ### 12. Script de Setup Automático (opcional)
@@ -1394,13 +1420,14 @@ def main():
 if __name__ == '__main__':
     main()
 
-'''
+```
+---
 
 ## 13. FORMATO DE SAÍDA JSON
 
 Agora o arquivo completo deve incluir:
 
-'''
+```json
 {
   "data_execucao": "2026-08-17T10:30:00.000Z",
   "periodo_busca": {
@@ -1454,7 +1481,7 @@ Agora o arquivo completo deve incluir:
     "vencimento_mais_proximo": "2026-08-13 | null"
   }
 }
-'''
+```
 
 ---
 
@@ -1521,10 +1548,11 @@ Quando o usuário enviar o JSON, o agente deve:
 	- Quais vencem hoje
 	- Quais vencem nos próximos dias
 
+---
 
 ## RESUMO DA ESTRUTURA COMPLETA DE ARQUIVOS
 
-'''
+```txt
 leitor-contas-pagar/
 │
 ├── README.md                          # Instruções de uso
@@ -1546,18 +1574,17 @@ leitor-contas-pagar/
 │
 └── output/
     └── contas_a_pagar.json            # JSON de saída
-'''
+```
+
+---
 
 ## INSTRUÇÕES FINAIS PARA O AGENTE
 
 Quando o usuário pedir para processar e-mails:
 
 1. ##Gere todo o código acima## de forma organizada
-
 2. ##Explique## o fluxo de trabalho passo-a-passo
-
 3. ##Instrua## sobre como obter o credentials.json
-
 4. ##Após o usuário executar## e enviar o JSON, analise e apresente:
 
 	- Tabela com todas as contas
