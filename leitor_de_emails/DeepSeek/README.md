@@ -1609,3 +1609,58 @@ pip install -r requirements.txt
 - Sempre ative o ambiente antes de instalar pacotes ou executar a aplicação, para garantir que as dependências sejam isoladas do seu Python global.
 - Quando terminar o trabalho, basta desativar com deactivate.
 - Se precisar de um caminho diferente para o Python (por exemplo, python3 ou um caminho absoluto), ajuste o comando da primeira linha ade acordo
+
+# Crie um arquivo temporário check_deps.py
+
+```python
+python - <<'PY'
+import pkg_resources, sys
+required = [
+    "google-auth>=2.23.0",
+    "google-auth-oauthlib>=1.0.0",
+    "google-api-python-client>=2.108.0",
+    "pypdf>=3.17.0",
+    "pdfplumber>=0.10.0",
+    "python-dateutil>=2.8.2",
+    "requests>=2.31.0",
+]
+missing = False
+for req in required:
+    try:
+        pkg_resources.require(req)
+        print(f"[OK]   {req}")
+    except Exception as e:
+        print(f"[MISSING] {req} → {e}")
+        missing = True
+sys.exit(1 if missing else 0)
+PY
+```
+
+Saída [OK] → a dependência está presente e atende à versão mínima.
+Saída [MISSING] → a dependência está ausente ou a versão é inferior; instale‑a com:
+
+```powershell
+python -m pip install -r requirements.txt
+````
+
+## 4️⃣ Dica de boas práticas
+
+- Sempre use python -m pip … em vez de chamar pip diretamente. Assim você garante que o pip associado ao interpretador Python ativo (o do seu venv) será usado.
+- Mantenha um requirements.txt (como já está no seu repositório). Quando precisar recriar o ambiente, basta:
+
+```powershell
+python -m venv .venv          # (caso ainda não exista)
+.\.venv\Scripts\activate     # PowerShell
+# ou .\.venv\Scripts\activate.bat  # cmd
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+##Resumindo (passo‑a‑passo)##
+
+- Ative o venv → já feito.
+- Rode python -m pip list ou python -m pip show <pacote> para conferir manualmente.
+- Opcional: execute o pequeno script acima para validar todas de uma vez.
+- Se algum pacote faltar ou desatualizado, instale‑os com python -m pip install -r requirements.txt.
+Assim você tem certeza de que as dependências estejam instaladas.
+
