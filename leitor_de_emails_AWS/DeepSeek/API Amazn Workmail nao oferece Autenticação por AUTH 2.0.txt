@@ -1,0 +1,28 @@
+**Sim:** a API de acesso ao Amazon WorkMail (via IMAP/SMTP) **não oferece um fluxo de autenticação OAuth 2.0 nativo**.  
+
+A forma padrão de login é:
+
+| Método | Descrição |
+|--------|------------|
+| **Usuário / Senha** | Credenciais do usuário do WorkMail (ou senha de aplicativo, se o MFA estiver habilitado). |
+| **Credenciais IAM (para programaticamente)** | Usar o SDK da AWS (IAM Access Key + Secret) para chamar as APIs de administração do WorkMail, mas não para autenticação IMAP/SMTP. |
+
+### Por que não há OAuth 2.0 direto?
+
+* O serviço WorkMail foi projetado para ser compatível com clientes de e‑mail padrão que esperam autenticação **SASL PLAIN** (usuário + senha) ou **SASL LOGIN**.
+* Não existe um endpoint de token OAuth 2.0 fornecido pelo WorkMail para troca por um *access token* que possa ser usado no comando `AUTH XOAUTH2` do IMAP/SMTP.
+
+### O que fazer se precisar de OAuth 2.0?
+
+1. **Camada de identidade externa** – Você pode colocar um provedor de identidade (ex.: Amazon Cognito, Azure AD, Google Workspace) na frente do WorkMail e usar OAuth 2.0 para autenticar seu usuário nesse provedor.  
+   Depois, o provedor devolve credenciais (usuário + senha temporária ou token) que podem ser usadas para conectar via IMAP ao WorkMail.
+
+2. **Aplicativo de senha** – Quando o usuário tem MFA habilitado, o WorkMail permite gerar **senhas de aplicativo** que são usadas como “senha” tradicional no cliente IMAP. Essa abordagem mantém a compatibilidade sem precisar de OAuth.
+
+3. **SDK da AWS** – Para operações de administração (criar usuários, configurar grupos, etc.) utilize o **AWS SDK** com credenciais IAM. Esse caminho não usa IMAP/SMTP nem OAuth 2.0.
+
+### Resumindo
+
+- **Não há suporte nativo a OAuth 2.0** para login no WorkMail via IMAP/SMTP.  
+- Use usuário + senha (ou senha de aplicativo) para a conexão `imaplib` que já está implementada no seu cliente `WorkmailClient`.  
+- Caso realmente precise de OAuth 2.0, implemente uma camada de identidade externa (ex.: Cognito) que gere credenciais compatíveis com o WorkMail e passe‑as ao seu cliente.
