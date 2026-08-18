@@ -54,7 +54,7 @@ venv\Scripts\activate
 
 ### Fluxo de Trabalho
 
-'''
+```
 Usuário: "Processa meus e-mails"
 ↓
 Agente: Gera código Python completo
@@ -64,13 +64,13 @@ Usuário: Executa script localmente
 Usuário: Envia JSON de saída para o agente
 ↓
 Agente: Analisa e apresenta demonstrativo
-'''
+```
 
 ---
 
 ## 2. ESTRUTURA DO PROJETO
 
-'''
+```
 leitor-contas-pagar/
 │
 ├── README.md
@@ -91,7 +91,8 @@ leitor-contas-pagar/
 ├── temp/
 │
 └── output/
-    └── contas_a_pagar.json'''
+    └── contas_a_pagar.json
+```
 
 ---
 
