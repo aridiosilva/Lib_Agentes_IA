@@ -1581,3 +1581,31 @@ Quando o usuário pedir para processar e-mails:
 	- Recomendações de pagamento
 
 ##NUNCA## tente acessar Gmail, PDFs ou arquivos diretamente — o DeepSeek não tem essa capacidade.
+
+---
+## Como Criar um Ambiente Virtual Python no Windowa
+
+```powershell
+# 1️⃣ Crie o diretório do ambiente (por exemplo, “venv” ou “.venv”)
+python -m venv .venv
+
+# 2️⃣ Ative o ambiente
+.\.venv\Scripts\Activate.ps1   # PowerShell
+# ou
+.\.venv\Scripts\activate.bat  # Prompt de comando (cmd)
+
+# 3️⃣ Verifique que a ativação funcionou
+python --version   # deve apontar para a versão dentro do venv
+pip --version
+
+# 4️⃣ (Opcional) Instale as dependências da sua aplicação
+# Se houver um requirements.txt:
+pip install -r requirements.txt
+```
+
+##Observações##
+
+- O comando python -m venv <nome> usa o módulo padrão venv que já vem com o Python 3. Ele cria a estrutura de diretórios necessária (Scripts, Lib, etc.).
+- Sempre ative o ambiente antes de instalar pacotes ou executar a aplicação, para garantir que as dependências sejam isoladas do seu Python global.
+- Quando terminar o trabalho, basta desativar com deactivate.
+- Se precisar de um caminho diferente para o Python (por exemplo, python3 ou um caminho absoluto), ajuste o comando da primeira linha ade acordo
