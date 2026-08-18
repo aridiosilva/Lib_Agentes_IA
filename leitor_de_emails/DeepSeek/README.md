@@ -110,9 +110,10 @@ python-dateutil>=2.8.2
 requests>=2.31.0
 ```
 
-##4. src/gmail_client.py
+## 4. src/gmail_client.py
 
 ```
+python
 """
   src/gmail_client.py
   Gmail Client - Conexão e busca de e-mails via API Gmail
@@ -344,7 +345,7 @@ class GmailClient:
 ```
 
 
-##5. src/pdf_extractor.py
+## 5. src/pdf_extractor.py
 
 ```
 """
@@ -679,7 +680,7 @@ class PDFExtractor:
 ```
 ---
 
-##6. src/email_processor.py
+## 6. src/email_processor.py
 
 ```
 """
@@ -943,7 +944,7 @@ class EmailProcessor:
 ```
 ---
 
-##7. src/_main_.py
+## 7. src/_main_.py
 
 ```
 """
@@ -1076,7 +1077,7 @@ if __name__ == '__main__':
 
 ---
 
-##8. src/_init_.py
+## 8. src/_init_.py
 
 ```
 """
@@ -1094,7 +1095,7 @@ __all__ = ['GmailClient', 'PDFExtractor', 'EmailProcessor']
 
 ---
 
-##9. src/main.py (Opcional - permite executar como módulo)
+## 9. src/main.py (Opcional - permite executar como módulo)
 
 ```
 """
@@ -1110,7 +1111,7 @@ if __name__ == '__main__':
 
 ---
 
-##10. credentials/credentials.json - INSTRUÇÕES
+## 10. credentials/credentials.json - INSTRUÇÕES
 
 ```
 /*
@@ -1220,7 +1221,7 @@ O sistema gera um arquivo output/contas_a_pagar.json com:
 - Alertas (vencidos, vencem hoje, vencem em 3 dias)
 - Estatísticas gerais
 
-##🗂️ Estrutura do Projeto
+## 🗂️ Estrutura do Projeto
 
 ```
 leitor-contas-pagar/
@@ -1241,7 +1242,7 @@ leitor-contas-pagar/
 ```
 ---
 
-##⚙️ Configurações
+## ⚙️ Configurações
 
 As principais configurações estão em src/email_processor.py:
 
@@ -1257,13 +1258,13 @@ Verifique se o arquivo está em credentials/credentials.json
 
 Baixe novamente do Google Cloud Console
 
-###Erro: "Dependência faltando"
+### Erro: "Dependência faltando"
 
 ```
 pip install -r requirements.txt
 ```
 
-###Erro de autenticação
+### Erro de autenticação
 
 ```
 - Delete credentials/token.pickle e execute novamente
