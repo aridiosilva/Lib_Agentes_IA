@@ -1,0 +1,21 @@
+leitor-contas-pagar/
+│
+├── README.md                          # Instruções de uso
+├── requirements.txt                   # Dependências Python
+├── setup.py                           # Script de setup automático
+│
+├── credentials/
+│   └── credentials.json               # Baixado do Google Cloud Console
+│
+├── src/
+│   ├── __init__.py                    # Pacote Python
+│   ├── __main__.py                    # Ponto de entrada como módulo
+│   ├── gmail_client.py                # Conexão Gmail
+│   ├── pdf_extractor.py               # Extração de PDFs
+│   ├── email_processor.py             # Orquestração
+│   └── main.py                        # Ponto de entrada principal
+│
+├── temp/                              # PDFs temporários
+│
+└── output/
+    └── contas_a_pagar.json            # JSON de saída

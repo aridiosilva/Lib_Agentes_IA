@@ -24,3 +24,5 @@ Use somente as permissões indispensáveis.
 
 ```text
 https://www.googleapis.com/auth/gmail.readonly
+
+## Enviar emails
